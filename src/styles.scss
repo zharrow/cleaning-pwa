@@ -1,1 +1,67 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@taiga-ui/core/styles/taiga-ui-global';
+@import '@taiga-ui/styles/taiga-ui-global';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+// Variables globales
+:root {
+  --tui-primary: #0073e6;
+  --tui-primary-hover: #005bb3;
+  --tui-success: #00b864;
+  --tui-warning: #ff9800;
+  --tui-error: #f44336;
+}
+
+// Styles globaux
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+// Classes utilitaires personnalisées
+.container-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Styles pour le mode offline
+.offline-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--tui-error);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+// PWA styles
+@media (display-mode: standalone) {
+  .pwa-only {
+    display: block;
+  }
+}
+
+// Dark mode support (optionnel)
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tui-base-01: #1a1a1a;
+    --tui-base-02: #2d2d2d;
+  }
+}
