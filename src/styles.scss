@@ -1,8 +1,8 @@
 @import '@taiga-ui/core/styles/taiga-ui-global';
 @import '@taiga-ui/styles/taiga-ui-global';
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+
+// Import Tailwind CSS v4 (sans PostCSS)
+@import 'tailwindcss';
 
 // Variables globales
 :root {

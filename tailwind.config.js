@@ -37,7 +37,4 @@ module.exports = {
     },
   },
   plugins: [],
-  corePlugins: {
-    preflight: false, // Important pour Taiga UI
-  },
 }
