@@ -1,18 +1,26 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
 import { 
-  TuiButtonModule,
-  TuiDataListModule,
-  TuiHostedDropdownModule,
-  TuiLoaderModule,
-  TuiSvgModule,
+  TuiButton,
+  TuiDataList,
+  TuiDropdown,
+  TuiLoader,
+  TuiIcon,
+  TuiHint,
+  TuiTextfield,
+  TuiSurface,
+  TuiTitle
 } from '@taiga-ui/core';
 import { 
-  TuiAvatarModule,
-  TuiBadgeModule,
-  TuiMarkerIconModule,
-  TuiProgressModule,
+  TuiAvatar,
+  TuiBadge,
+  TuiProgress,
+  TuiAccordion,
+  TuiCheckbox,
+  TuiInputFiles,
+  TuiPagination,
 } from '@taiga-ui/kit';
 import { AuthService } from '../../core/services/auth.service';
 import { TaskService } from '../../core/services/task.service';
@@ -21,6 +29,7 @@ import { NetworkService } from '../../core/services/network.service';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { getDateLabel } from '../../shared/utils/date.utils';
+import { TaskLog } from '../../core/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,17 +37,14 @@ import { getDateLabel } from '../../shared/utils/date.utils';
   imports: [
     CommonModule,
     RouterLink,
-    TuiButtonModule,
-    TuiDataListModule,
-    TuiHostedDropdownModule,
-    TuiLoaderModule,
-    TuiSvgModule,
-    TuiAvatarModule,
-    TuiBadgeModule,
-    TuiMarkerIconModule,
-    TuiProgressModule,
+    TuiButton,
+    TuiDataList, 
+    TuiDropdown,
+    TuiAvatar,
+    TuiBadge,
+    TuiProgress,
     LoadingSpinnerComponent,
-    EmptyStateComponent,
+    EmptyStateComponent
   ],
   template: `
     <div class="min-h-screen bg-gray-50">
@@ -50,9 +56,9 @@ import { getDateLabel } from '../../shared/utils/date.utils';
               <h1 class="text-xl font-semibold text-gray-900">
                 Tableau de bord
               </h1>
-              <tui-badge 
-                [value]="networkService.isOnline() ? 'En ligne' : 'Hors ligne'"
-                [status]="networkService.isOnline() ? 'success' : 'error'"
+              <tui-badge
+                value="networkService.isOnline() ? 'En ligne' : 'Hors ligne'"
+                status="networkService.isOnline() ? 'success' : 'error'"
               />
             </div>
             
@@ -61,16 +67,16 @@ import { getDateLabel } from '../../shared/utils/date.utils';
                 {{ currentDate() }}
               </span>
               
-              <tui-hosted-dropdown [content]="userMenu">
+              <tui-dropdown content="userMenu">
                 <button tuiButton appearance="flat" size="s">
                   <tui-avatar
-                    [text]="userInitials()"
+                    text="userInitials()"
                     size="xs"
                     class="mr-2"
                   ></tui-avatar>
                   {{ authService.currentUser()?.fullName }}
                 </button>
-              </tui-hosted-dropdown>
+              </tui-dropdown>
             </div>
           </div>
         </div>
@@ -101,12 +107,12 @@ import { getDateLabel } from '../../shared/utils/date.utils';
                 <div class="bg-gray-50 rounded-lg p-4">
                   <p class="text-sm text-gray-600 mb-2">Progression</p>
                   <div class="flex items-center gap-3">
-                    <tui-progress
+                    <tui-progress-circle
                       [value]="progressPercentage()"
                       [max]="100"
                       size="m"
                       class="flex-1"
-                    ></tui-progress>
+                    ></tui-progress-circle>
                     <span class="text-lg font-semibold">
                       {{ progressPercentage() }}%
                     </span>
@@ -120,8 +126,8 @@ import { getDateLabel } from '../../shared/utils/date.utils';
                 <div class="bg-gray-50 rounded-lg p-4">
                   <p class="text-sm text-gray-600 mb-2">Statut</p>
                   <tui-badge
-                    [value]="getSessionStatusLabel(todaySession()!.status)"
-                    [status]="getSessionStatusColor(todaySession()!.status)"
+                    value="getSessionStatusLabel(todaySession()!.status)"
+                    status="getSessionStatusColor(todaySession()!.status)"
                     size="l"
                   />
                 </div>
@@ -175,11 +181,11 @@ import { getDateLabel } from '../../shared/utils/date.utils';
                         {{ room.completedTasks }} / {{ room.totalTasks }} tâches
                       </span>
                     </div>
-                    <tui-progress
+                    <tui-progress-circle
                       [value]="room.progress"
                       [max]="100"
                       size="s"
-                    ></tui-progress>
+                    ></tui-progress-circle>
                   </div>
                 }
               </div>
@@ -225,7 +231,7 @@ export class DashboardComponent implements OnInit {
 
   loading = signal(true);
   todaySession = signal<any>(null);
-  tasks = signal<any[]>([]);
+  tasks = signal<Observable<TaskLog[]>>([]);
 
   currentDate = computed(() => getDateLabel(new Date()));
   completedTasks = computed(() => this.tasks().filter(t => t.status === 'FAIT').length);

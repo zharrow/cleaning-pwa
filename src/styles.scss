@@ -1,23 +1,38 @@
+// src/styles.scss - Version corrigée
 @import '@taiga-ui/core/styles/taiga-ui-global';
-@import '@taiga-ui/styles/taiga-ui-global';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-// Import Tailwind CSS v4 (sans PostCSS)
-@import 'tailwindcss';
-
-// Variables globales
+// Variables globales personnalisées
 :root {
   --tui-primary: #0073e6;
   --tui-primary-hover: #005bb3;
   --tui-success: #00b864;
   --tui-warning: #ff9800;
   --tui-error: #f44336;
+  --tui-neutral: #6b7280;
+  
+  // Variables pour les badges
+  --tui-status-success: #10b981;
+  --tui-status-warning: #f59e0b;
+  --tui-status-error: #ef4444;
+  --tui-status-info: #3b82f6;
 }
 
-// Styles globaux
+// Styles globaux de base
 html, body {
   height: 100%;
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+// Reset pour une meilleure compatibilité
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 // Classes utilitaires personnalisées
@@ -25,19 +40,62 @@ html, body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+  
+  @media (min-width: 640px) {
+    padding: 0 1.5rem;
+  }
+  
+  @media (min-width: 1024px) {
+    padding: 0 2rem;
+  }
 }
 
-// Animations
+// Animations personnalisées
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Classes d'animation
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
 
-// Styles pour le mode offline
+.animate-slide-in {
+  animation: slideIn 0.4s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Styles pour l'indicateur hors ligne
 .offline-indicator {
   position: fixed;
   bottom: 20px;
@@ -49,19 +107,182 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-}
-
-// PWA styles
-@media (display-mode: standalone) {
-  .pwa-only {
-    display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  
+  &.success {
+    background-color: var(--tui-success);
+  }
+  
+  &.warning {
+    background-color: var(--tui-warning);
   }
 }
 
-// Dark mode support (optionnel)
+// Surcharge des styles Taiga UI si nécessaire
+.tui-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Styles pour les badges personnalisés
+.custom-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  &.success {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  &.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  &.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  &.info {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+// Styles pour les cartes
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.elevated {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Support PWA
+@media (display-mode: standalone) {
+  .pwa-only {
+    display: block !important;
+  }
+  
+  .browser-only {
+    display: none !important;
+  }
+  
+  // Ajouter un padding-top pour compenser la barre de statut sur mobile
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+// Mode sombre (optionnel pour le futur)
 @media (prefers-color-scheme: dark) {
   :root {
     --tui-base-01: #1a1a1a;
     --tui-base-02: #2d2d2d;
+    --tui-base-03: #404040;
+    --tui-text-01: #ffffff;
+    --tui-text-02: #e5e5e5;
   }
+  
+  html, body {
+    background-color: var(--tui-base-01);
+    color: var(--tui-text-01);
+  }
+  
+  .card {
+    background-color: var(--tui-base-02);
+    border-color: var(--tui-base-03);
+  }
+}
+
+// Styles pour les messages d'erreur
+.error-message {
+  color: var(--tui-error);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+// Styles pour les états de chargement
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Responsive utilities personnalisées
+@media (max-width: 640px) {
+  .container-app {
+    padding: 0 0.75rem;
+  }
+  
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+// Styles pour l'accessibilité
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// Focus visible pour une meilleure accessibilité
+.focus-visible {
+  outline: 2px solid var(--tui-primary);
+  outline-offset: 2px;
+}
+
+// Styles pour les transitions de page
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }

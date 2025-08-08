@@ -1,46 +1,76 @@
-import { Component, inject } from '@angular/core';
+// src/app/shared/components/offline-indicator/offline-indicator.component.ts
+import { Component, OnInit, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TuiHintModule } from '@taiga-ui/core';
+import { TuiHint } from '@taiga-ui/core';
 import { NetworkService } from '../../../core/services/network.service';
-import { OfflineQueueService } from '../../../core/services/offline-queue.service';
+import { QueueService } from '../../../core/services/queue.service';
+import { switchMap, from, Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-offline-indicator',
   standalone: true,
-  imports: [CommonModule, TuiHintModule],
+  imports: [CommonModule, TuiHint],
   template: `
-    @if (networkService.isOffline()) {
-      <div class="offline-indicator animate-fade-in">
-        <span class="flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
-          </svg>
-          Mode hors ligne
-          @if (queueSize$ | async; as size) {
-            @if (size > 0) {
-              <span class="ml-2 text-sm">({{ size }} en attente)</span>
-            }
+    @if (!networkService.isOnline()) {
+      <div class="offline-indicator animate-fade-in" [tuiHint]="hintContent">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-medium">
+            Mode hors ligne
+          </span>
+          @if (queueSize() > 0) {
+            <span class="text-xs bg-red-600 text-white px-2 py-1 rounded-full">
+              {{ queueSize() }}
+            </span>
           }
-        </span>
+        </div>
       </div>
     }
   `,
   styles: [`
-    :host {
+    .offline-indicator {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
+      background-color: #ef4444;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       z-index: 1000;
     }
   `]
 })
-export class OfflineIndicatorComponent {
-  networkService = inject(NetworkService);
-  private queueService = inject(OfflineQueueService);
+export class OfflineIndicatorComponent implements OnInit, OnDestroy {
+  readonly networkService = inject(NetworkService);
+  private readonly queueService = inject(QueueService);
   
-  queueSize$ = this.networkService.online$.pipe(
-    switchMap(() => from(this.queueService.getQueueSize()))
-  );
+  readonly queueSize = signal(0);
+  private subscription?: Subscription;
+
+  get hintContent(): string {
+    const size = this.queueSize();
+    if (size > 0) {
+      return `${size} action(s) en attente de synchronisation`;
+    }
+    return 'Vous êtes hors ligne. Les modifications seront synchronisées automatiquement.';
+  }
+
+  ngOnInit() {
+    // Surveiller la taille de la queue toutes les 5 secondes
+    this.subscription = interval(5000).pipe(
+      switchMap(() => from(this.queueService.getQueueSize()))
+    ).subscribe({
+      next: (size) => this.queueSize.set(size),
+      error: (error) => {
+        console.error('Erreur lors de la récupération de la taille de la queue:', error);
+        this.queueSize.set(0);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
+  }
 }
