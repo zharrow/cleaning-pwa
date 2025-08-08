@@ -1,6 +1,7 @@
 import { BaseModel } from './base.model';
 
 export interface Session extends BaseModel {
+  id: string;
   date: Date;
   status: SessionStatus;
   notes?: string;
